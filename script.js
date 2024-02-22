@@ -9,20 +9,34 @@ const offset = (()=>{
 let circles = []
 let gravity = 1
 
-
-canvas.onclick = event => {
-    let position = {x:event.x, y:event.y};
+function rzut(){
+    let r = 10
+    let position = {x:r, y:canvas.clientHeight - r};
     let circle = document.createElementNS(svgNS, "circle");
-    circle.setAttribute( "cx", position.x-offset.x);
-    circle.setAttribute( "cy", position.y-offset.y);
-    circle.setAttribute( "r", 10);
-    circle.setAttribute( "fill", "red");
-    circle.vx = (Math.random()-0.5)*200;
-    circle.vy = (Math.random()-0.5)*200;
+    circle.setAttribute( "cx", position.x);
+    circle.setAttribute( "cy", position.y);
+    circle.setAttribute( "r", r);
+    circle.setAttribute( "fill", "black");
+    circle.vx = 500;
+    circle.vy = 500;
     circle.onGround = false
     circles.push(circle);
     canvas.appendChild(circle);
 }
+
+// canvas.onclick = event => {
+//     let position = {x:event.x, y:event.y};
+//     let circle = document.createElementNS(svgNS, "circle");
+//     circle.setAttribute( "cx", position.x-offset.x);
+//     circle.setAttribute( "cy", position.y-offset.y);
+//     circle.setAttribute( "r", 10);
+//     circle.setAttribute( "fill", "red");
+//     circle.vx = (Math.random()-0.5)*200;
+//     circle.vy = (Math.random()-0.5)*200;
+//     circle.onGround = false
+//     circles.push(circle);
+//     canvas.appendChild(circle);
+// }
 let predkosc = 20
 let lastUpdate;
 function selectPlanet (planetGravity){
@@ -78,7 +92,7 @@ function updateCircle() {
          if(currentY  + r >= canvas.clientHeight){
              currentY = 2*canvas.clientHeight - (currentY + r) - r;
              circle.vy = -circle.vy * dumping
-             if (Math.abs(circle.vy)<50) {
+             if (Math.abs(circle.vy)<10) {
                 circle.vy = 0
                 currentY = canvas.clientHeight - r
                 circle.onGround = true
@@ -99,8 +113,8 @@ function updateCircle() {
         if (circle.onGround == false) {
             circle.vy = circle.vy + deltaTime * gravity * 0.3
         } else {
-            circle.vx = circle.vx * (1 - gravity*0.001)
-            if (Math.abs(circle.vx)<0.1) {
+            circle.vx = circle.vx * (1 - gravity*0.005)
+            if (Math.abs(circle.vx)<0.015) {
                 circle.vx = 0
             }
         }
