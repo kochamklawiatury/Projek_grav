@@ -1,18 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>   
-<link rel="stylesheet" href="styles/style.css"/>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>projekt trymestralny</title>
+<head>
+    <link rel="stylesheet" href="styles/style.css"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>projekt trymestralny</title>
 </head>
 <body>
-<svg
-            id="root"
-            width="400"
-            height="400"
-            style="border: 3px solid black"
-></svg>
-<script src="script.js"></script>
+    <div>
+        <svg id="root" width="1200" height="400" style="border: 3px solid black"></svg>
+    </div>
+    
+    <div>
+        <label for="forceInput">Prędkość:</label>
+        <input type="text" id="forceInput" placeholder="Wprowadź prędkość rzutu" />
+    </div>
+
+    <div>
+        <label for="heightInput">Kąd łuku rzutu:</label>
+        <input type="text" id="heightInput" placeholder="Wprowadź kąt łuku" />
+    </div>
+    
+    <div>
+        <label for="massInput">Masa kulki</label>
+        <input type="text" id="massInput" placeholder="Wprowadź masę kulki" />
+    </div>
+
+    <div>
+        <button id = 'merkury' class="button" onclick="selectPlanet(3.7)">Merkury</button>
+        <button id = 'wenus' class="button" onclick="selectPlanet( 8.87)">Wenus</button>
+        <button id = 'ziemia' class="button" onclick="selectPlanet(9.807)">Ziemia</button>
+        <button id = 'ksizyc' class="button" onclick="selectPlanet(1.62)">Księżyc</button>
+        <button id = 'mars' class="button" onclick="selectPlanet(3.71)">Mars</button>
+        <button id = 'jowisz' class="button" onclick="selectPlanet(24.79)">Jowisz</button>
+        <button id = 'saturn' class="button" onclick="selectPlanet(10.44)">Saturn</button>
+        <button id = 'uran' class="button" onclick="selectPlanet( 8.69)">Uran</button>
+        <button id = 'neptun' class="button" onclick="selectPlanet(11.15)">Neptun</button>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
