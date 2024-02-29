@@ -8,22 +8,25 @@ const offset = (()=>{
 
 let circles = []
 let gravity = 1
-
+let stoppingThreshold = 0.015
+let onGroundThreshold = 15
 
 function rzut(){
+    height = parseInt(document.getElementById("heightInput").value)||1
     let r = 10
-    let position = {x:r, y:canvas.clientHeight - r};
+    let position = {x:r, y:canvas.clientHeight - r - height};
     let circle = document.createElementNS(svgNS, "circle");
     circle.setAttribute( "cx", position.x);
     circle.setAttribute( "cy", position.y);
     circle.setAttribute( "r", r);
-    circle.setAttribute( "fill", "black");
+    circle.setAttribute( "fill", "blue");
     degrees = parseInt(document.getElementById("angleInput").value)||0
     mass = 1
     velocity = parseInt(document.getElementById("forceInput").value) * mass;
     let rad = Math.PI/180*degrees
     circle.vx = Math.cos(rad)*velocity;
-    circle.vy = Math.sin(rad)*velocity; 
+    circle.vy = -Math.sin(rad)*velocity; 
+    
     circle.onGround = false;
     circles.push(circle);
     canvas.appendChild(circle);
@@ -55,11 +58,12 @@ function updateCircle() {
         return;
     }
     let currentTime = new Date();
-    let deltaTime  = currentTime - lastUpdate;
+    let deltaTime  = (currentTime - lastUpdate)/1000;
     lastUpdate = currentTime
     
-    AirDumping = 0.0005
-    dumping = parseFloat(document.getElementById("DumpingInput").value) || 0
+    let airResistance = parseFloat(document.getElementById("airResistanceInput").value) || 0
+    let groundResistance = parseFloat(document.getElementById("groundResistanceInput").value) || 0
+    let dumping = parseFloat(document.getElementById("DumpingInput").value) || 0
     // for (ball of circles) {
     //     ball.fx = 0
     //     ball.fy = 0 
@@ -86,8 +90,10 @@ function updateCircle() {
     // }
 
     for(let circle of circles){
-        currentX = parseFloat(circle.getAttribute("cx")) + circle.vx*(deltaTime/1000);
-        currentY = parseFloat(circle.getAttribute("cy")) + circle.vy*(deltaTime/1000);
+        currentX = parseFloat(circle.getAttribute("cx")) + circle.vx*(deltaTime);
+        y = parseFloat(circle.getAttribute("cy"))
+        console.log("y ",y)
+        currentY = parseFloat(circle.getAttribute("cy")) + circle.vy*(deltaTime);
         r = parseFloat(circle.getAttribute("r"))
          
         if(currentX +  r > canvas.clientWidth){
@@ -98,13 +104,15 @@ function updateCircle() {
         if(currentY  + r >= canvas.clientHeight){
             currentY = 2*canvas.clientHeight  - 2*r-(currentY);
             circle.vy = -circle.vy * dumping
-            if (Math.abs(circle.vy)<10) {
+            if (Math.abs(circle.vy)<onGroundThreshold) {
                 circle.vy = 0
                 currentY = canvas.clientHeight - r
                 circle.onGround = true
+                circle.setAttribute( "fill", "red");
             }
         }
 
+        //TODO tutaj w dwóch poniższych brak dokładnego przeliczenia pozycji i wytłumienia energii
         if(currentX - r < 0){
             currentX = - (currentX - r) + r;
             circle.vx = -circle.vx
@@ -115,22 +123,63 @@ function updateCircle() {
             circle.vy = -circle.vy
         }
 
-  
-        if (circle.onGround == false) {
-            circle.vy = circle.vy + deltaTime * gravity * 0.3
-            circle.vx = circle.vx * (1 - AirDumping)
-        } else {
-            circle.vx = circle.vx * (1 - gravity*0.005)
-            if (Math.abs(circle.vx)<0.015) {
-                circle.vx = 0
+        let velocityMagnitude = Math.sqrt( circle.vx*circle.vx + circle.vy*circle.vy);
+        let h = canvas.clientHeight-currentY
+        let Ep = mass * gravity * h 
+        let Ek = mass * velocityMagnitude * velocityMagnitude / 2
+        console.log("h", h,"   velocity ", velocityMagnitude, '   energy(potential, kinetic, total): ', Ep, Ek, Ep+ Ek);
+        if(velocityMagnitude > 0){
+            
+            //air resistance ////////////////////////////
+            let dragForce = airResistance * velocityMagnitude * velocityMagnitude //wspolczynnik * vel^2
+            let dragX = dragForce * circle.vx/velocityMagnitude;
+            let dragY = dragForce * circle.vy/velocityMagnitude;
+        
+            let accX = dragX / mass;
+            let accY = dragY / mass;
+            //tutaj przez słabość symulacji i rzadkie klatki wartość v może przekroczyć 0 i wektor zmienić zwrot. Jeśli tak jest należy ustawić 0 na sztywno;
+            console.log(currentX, currentY)
+            if(Math.abs(accX * deltaTime) > Math.abs(circle.vx)){
+                circle.vx = 0;
+            } else{   
+                circle.vx = circle.vx - accX * deltaTime;
             }
+            if(Math.abs(accY * deltaTime) > Math.abs(circle.vy)){
+                circle.vy = 0;
+            } else{   
+                circle.vy = circle.vy - accY * deltaTime;
+            }
+            ///////////////////////////////////////////////
+        
+    
+            if (circle.onGround == false) {
+                circle.vy = circle.vy + deltaTime * gravity
+            } else {
+                //ground resistance //////////////////////////
+                let velocityMagnitude = Math.sqrt( circle.vx*circle.vx + circle.vy*circle.vy);
+                let frictionForce = groundResistance* mass * gravity //wspolczynnik * sila_nacisku
+                let frictionX = frictionForce * circle.vx/velocityMagnitude
+                let frictionAcceleration = frictionX / mass;
+                //tutaj przez słabość symulacji i rzadkie klatki wartość v może przekroczyć 0 i wektor zmienić zwrot. Jeśli tak jest należy ustawić 0 na sztywno;
+                if(Math.abs(frictionAcceleration*deltaTime) > Math.abs(circle.vx)){
+                    circle.vx = 0;
+                } else {
+                    circle.vx = circle.vx -frictionAcceleration*deltaTime;
+                }
+                ////////////////////////////////////////////////
+
+
+                if (Math.abs(circle.vx)<stoppingThreshold) {
+                    circle.vx = 0
+                }
+            }
+
+            circle.setAttribute("cx", currentX);
+            circle.setAttribute("cy", currentY);
+            console.log(currentX, currentY,circle.vx, circle.vy)
         }
         
-        //circle.vx = circle.vx + deltaTime * gravity + circle.fy
-
-        circle.setAttribute("cx", currentX);
-        circle.setAttribute("cy", currentY);
-        //console.log(circle.vx, circle.vy)
+        
     }
 }
 
