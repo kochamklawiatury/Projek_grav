@@ -9,7 +9,7 @@ const offset = (()=>{
 let circles = []
 let gravity = 1
 
-mass = parseInt(document.getElementById("massSInput").value)||0
+
 function rzut(){
     let r = 10
     let position = {x:r, y:canvas.clientHeight - r};
@@ -18,10 +18,13 @@ function rzut(){
     circle.setAttribute( "cy", position.y);
     circle.setAttribute( "r", r);
     circle.setAttribute( "fill", "black");
-    
-    circle.vx = parseInt(document.getElementById("forceInput").value) * mass*0.001;
-    circle.vy = parseInt(document.getElementById("forceInput").value) * mass*0.001;
-    circle.onGround = false
+    degrees = parseInt(document.getElementById("angleInput").value)||0
+    mass = 1
+    velocity = parseInt(document.getElementById("forceInput").value) * mass;
+    let rad = Math.PI/180*degrees
+    circle.vx = Math.cos(rad)*velocity;
+    circle.vy = Math.sin(rad)*velocity; 
+    circle.onGround = false;
     circles.push(circle);
     canvas.appendChild(circle);
 }
@@ -55,6 +58,7 @@ function updateCircle() {
     let deltaTime  = currentTime - lastUpdate;
     lastUpdate = currentTime
     
+    AirDumping = 0.0005
     dumping = parseFloat(document.getElementById("DumpingInput").value) || 0
     // for (ball of circles) {
     //     ball.fx = 0
@@ -114,6 +118,7 @@ function updateCircle() {
   
         if (circle.onGround == false) {
             circle.vy = circle.vy + deltaTime * gravity * 0.3
+            circle.vx = circle.vx * (1 - AirDumping)
         } else {
             circle.vx = circle.vx * (1 - gravity*0.005)
             if (Math.abs(circle.vx)<0.015) {
@@ -129,4 +134,4 @@ function updateCircle() {
     }
 }
 
-setInterval(updateCircle, 5);
+setInterval(updateCircle, 1);
