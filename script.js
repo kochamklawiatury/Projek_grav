@@ -9,6 +9,7 @@ const offset = (()=>{
 let circles = []
 let gravity = 1
 
+mass = parseInt(document.getElementById("massSInput").value)||0
 function rzut(){
     let r = 10
     let position = {x:r, y:canvas.clientHeight - r};
@@ -17,8 +18,9 @@ function rzut(){
     circle.setAttribute( "cy", position.y);
     circle.setAttribute( "r", r);
     circle.setAttribute( "fill", "black");
-    circle.vx = 500;
-    circle.vy = 500;
+    
+    circle.vx = parseInt(document.getElementById("forceInput").value) * mass*0.001;
+    circle.vy = parseInt(document.getElementById("forceInput").value) * mass*0.001;
     circle.onGround = false
     circles.push(circle);
     canvas.appendChild(circle);
@@ -53,7 +55,7 @@ function updateCircle() {
     let deltaTime  = currentTime - lastUpdate;
     lastUpdate = currentTime
     
-    dumping = 0.8
+    dumping = parseFloat(document.getElementById("DumpingInput").value) || 0
     // for (ball of circles) {
     //     ball.fx = 0
     //     ball.fy = 0 
@@ -85,21 +87,21 @@ function updateCircle() {
         r = parseFloat(circle.getAttribute("r"))
          
         if(currentX +  r > canvas.clientWidth){
-             currentX = 2*canvas.clientWidth - (currentX + r) - r;
+             currentX = 2*canvas.clientWidth - 2*r-(currentX);
              circle.vx = -circle.vx * dumping
-         }
+        }
 
-         if(currentY  + r >= canvas.clientHeight){
-             currentY = 2*canvas.clientHeight - (currentY + r) - r;
-             circle.vy = -circle.vy * dumping
-             if (Math.abs(circle.vy)<10) {
+        if(currentY  + r >= canvas.clientHeight){
+            currentY = 2*canvas.clientHeight  - 2*r-(currentY);
+            circle.vy = -circle.vy * dumping
+            if (Math.abs(circle.vy)<10) {
                 circle.vy = 0
                 currentY = canvas.clientHeight - r
                 circle.onGround = true
-             }
-         }
+            }
+        }
 
-         if(currentX - r < 0){
+        if(currentX - r < 0){
             currentX = - (currentX - r) + r;
             circle.vx = -circle.vx
         }
@@ -123,7 +125,8 @@ function updateCircle() {
 
         circle.setAttribute("cx", currentX);
         circle.setAttribute("cy", currentY);
+        //console.log(circle.vx, circle.vy)
     }
 }
 
-setInterval(updateCircle, 5)
+setInterval(updateCircle, 5);
