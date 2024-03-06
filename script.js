@@ -9,7 +9,8 @@ const offset = (()=>{
 let circles = []
 let gravity = 1
 let stoppingThreshold = 0.015
-let onGroundThreshold = 15
+let onGroundThreshold = 50
+let mass = 1
 
 function rzut(){
     height = parseInt(document.getElementById("heightInput").value)||1
@@ -48,7 +49,7 @@ function rzut(){
 let predkosc = 20
 let lastUpdate;
 function selectPlanet (planetGravity){
-    gravity = planetGravity
+    gravity = planetGravity * 100.0
 }
 
 function updateCircle() {
@@ -92,7 +93,7 @@ function updateCircle() {
     for(let circle of circles){
         currentX = parseFloat(circle.getAttribute("cx")) + circle.vx*(deltaTime);
         y = parseFloat(circle.getAttribute("cy"))
-        console.log("y ",y)
+        //console.log("y ",y)
         currentY = parseFloat(circle.getAttribute("cy")) + circle.vy*(deltaTime);
         r = parseFloat(circle.getAttribute("r"))
          
@@ -112,22 +113,21 @@ function updateCircle() {
             }
         }
 
-        //TODO tutaj w dwóch poniższych brak dokładnego przeliczenia pozycji i wytłumienia energii
         if(currentX - r < 0){
             currentX = - (currentX - r) + r;
-            circle.vx = -circle.vx
+            circle.vx = -circle.vx * dumping
         }
 
         if(currentY - r <0){
             currentY = - (currentY - r) + r;
-            circle.vy = -circle.vy
+            circle.vy = -circle.vy * dumping
         }
 
         let velocityMagnitude = Math.sqrt( circle.vx*circle.vx + circle.vy*circle.vy);
         let h = canvas.clientHeight-currentY
         let Ep = mass * gravity * h 
         let Ek = mass * velocityMagnitude * velocityMagnitude / 2
-        console.log("h", h,"   velocity ", velocityMagnitude, '   energy(potential, kinetic, total): ', Ep, Ek, Ep+ Ek);
+        //console.log("h", h,"   velocity ", velocityMagnitude, '   energy(potential, kinetic, total): ', Ep, Ek, Ep+ Ek);
         if(velocityMagnitude > 0){
             
             //air resistance ////////////////////////////
@@ -138,7 +138,7 @@ function updateCircle() {
             let accX = dragX / mass;
             let accY = dragY / mass;
             //tutaj przez słabość symulacji i rzadkie klatki wartość v może przekroczyć 0 i wektor zmienić zwrot. Jeśli tak jest należy ustawić 0 na sztywno;
-            console.log(currentX, currentY)
+            //console.log(currentX, currentY)
             if(Math.abs(accX * deltaTime) > Math.abs(circle.vx)){
                 circle.vx = 0;
             } else{   
@@ -176,11 +176,11 @@ function updateCircle() {
 
             circle.setAttribute("cx", currentX);
             circle.setAttribute("cy", currentY);
-            console.log(currentX, currentY,circle.vx, circle.vy)
+            //console.log(currentX, currentY,circle.vx, circle.vy)
         }
         
         
     }
 }
 
-setInterval(updateCircle, 1);
+setInterval(updateCircle, 0.1);
